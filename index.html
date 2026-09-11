@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apolo-X: Misión de Rescate Químico Espacial</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --space-dark: #010105;
+            --panel-bg: rgba(6, 11, 25, 0.92);
+            --neon-blue: #00f0ff;
+            --neon-green: #00ff66;
+            --neon-red: #ff2a6d;
+            --neon-yellow: #ffcc00;
+            --neon-purple: #b537f2;
+            --neon-orange: #ff7700;
+            --neon-pink: #ff007f;
+            --neon-cyan: #00ffff;
+            --text-light: #e2e8f0;
+        }
+
+        * { box-sizing: border-box; font-family: 'Share Tech Mono', monospace; user-select: none; }
+
+        body {
+            background-color: var(--space-dark);
+            margin: 0; padding: 15px;
+            display: flex; justify-content: center; align-items: center; min-height: 100vh;
+            color: var(--text-light);
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        body.damage-flash { animation: flash-red 0.4s ease; }
+        @keyframes flash-red {
+            0%, 100% { background-color: var(--space-dark); }
+            50% { background-color: #500014; }
+        }
+
+        /* ESCENOGRAFÍA UNIVERSO COMPLETO Y DECORATIVO */
+        .stars-container {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            pointer-events: none; z-index: 0; overflow: hidden;
+            background: 
+                radial-gradient(circle at 15% 20%, rgba(181, 55, 242, 0.3) 0%, transparent 45%),
+                radial-gradient(circle at 85% 80%, rgba(0, 240, 255, 0.25) 0%, transparent 50%),
+                radial-gradient(circle at 50% 15%, rgba(255, 42, 109, 0.2) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 0, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 50% 50%, #050814 0%, #010105 100%);
+        }
+
+        .nebula-glow {
+            position: absolute; width: 100%; height: 100%;
+            background: radial-gradient(ellipse at 50% 60%, rgba(181, 55, 242, 0.18) 0%, transparent 70%);
+            animation: pulse-nebula 7s infinite alternate ease-in-out;
+        }
+        @keyframes pulse-nebula { 0% { opacity: 0.3; transform: scale(0.98); } 100% { opacity: 1; transform: scale(1.02); } }
+
+        .star {
+            position: absolute; background: white; border-radius: 50%;
+            animation: twinkle var(--duration) infinite ease-in-out;
+        }
+        @keyframes twinkle { 0%, 100% { opacity: 0.2; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.5); } }
+
+        /* ESTRELLAS FUGACES / COMETAS */
+        .shooting-star {
+            position: absolute; width: 120px; height: 2px;
+            background: linear-gradient(90deg, rgba(255,255,255,1), transparent);
+            opacity: 0; transform: rotate(-35deg);
+            animation: shoot 5s infinite linear;
+        }
+        @keyframes shoot {
+            0% { transform: translateX(0) translateY(0) rotate(-35deg); opacity: 0; }
+            5% { opacity: 1; }
+            15% { transform: translateX(-400px) translateY(300px) rotate(-35deg); opacity: 0; }
+            100% { opacity: 0; }
+        }
+
+        /* PLANETAS */
+        .planet { position: absolute; border-radius: 50%; opacity: 0.92; }
+        
+        .planet-earth {
+            width: 130px; height: 130px; top: 5%; left: 4%;
+            background: radial-gradient(circle at 30% 30%, #2563eb, #0f172a);
+            box-shadow: inset -12px -12px 25px rgba(0,0,0,0.9), 0 0 30px rgba(37, 99, 235, 0.6);
+        }
+        .planet-mars {
+            width: 85px; height: 85px; bottom: 8%; right: 6%;
+            background: radial-gradient(circle at 35% 35%, #ef4444, #450a0a);
+            box-shadow: inset -8px -8px 18px rgba(0,0,0,0.9), 0 0 20px rgba(239, 68, 68, 0.5);
+        }
+        .saturn-container { position: absolute; top: 10%; right: 3%; transform: rotate(-20deg); }
+        .planet-saturn {
+            width: 95px; height: 95px; border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #fde047, #78350f);
+            box-shadow: inset -10px -10px 18px rgba(0,0,0,0.9);
+        }
+        .saturn-ring {
+            position: absolute; top: 50%; left: 50%; width: 190px; height: 35px;
+            border: 7px solid rgba(254, 240, 138, 0.65); border-radius: 50%;
+            transform: translate(-50%, -50%); box-shadow: 0 0 12px rgba(250, 204, 21, 0.4);
+        }
+        .planet-neptune {
+            width: 70px; height: 70px; bottom: 15%; left: 3%;
+            background: radial-gradient(circle at 30% 30%, #00f0ff, #030712);
+            box-shadow: inset -8px -8px 15px rgba(0,0,0,0.9), 0 0 20px rgba(0, 240, 255, 0.4);
+        }
+        .planet-alien {
+            width: 50px; height: 50px; top: 45%; left: 2%;
+            background: radial-gradient(circle at 30% 30%, #b537f2, #2e1065);
+            box-shadow: inset -5px -5px 10px rgba(0,0,0,0.9), 0 0 15px rgba(181, 55, 242, 0.5);
+        }
+
+        /* CINTURÓN DE ASTEROIDES */
+        .asteroid {
+            position: absolute; background: #64748b; border-radius: 35% 65% 60% 40% / 40% 30% 70% 60%;
+            box-shadow: inset -4px -4px 8px rgba(0,0,0,0.9);
+            animation: float-asteroid var(--speed) infinite linear;
+        }
+        @keyframes float-asteroid {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            50% { transform: translate(25px, 35px) rotate(180deg); }
+            100% { transform: translate(0, 0) rotate(360deg); }
+        }
+
+        /* ESTRUCTURA PRINCIPAL */
+        .main-layout {
+            position: relative; z-index: 1;
+            display: grid; grid-template-columns: 340px 1fr; gap: 15px;
+            width: 100%; max-width: 1250px;
+        }
+        @media (max-width: 900px) { .main-layout { grid-template-columns: 1fr; } }
+
+        /* PANEL DE LA NAVE */
+        .ship-panel {
+            background: var(--panel-bg); border: 1px solid var(--neon-blue);
+            border-radius: 12px; padding: 15px; display: flex; flex-direction: column;
+            align-items: center; box-shadow: 0 0 35px rgba(0, 240, 255, 0.25); backdrop-filter: blur(10px);
+        }
+        .ship-title { font-family: 'Orbitron', sans-serif; font-size: 0.85rem; color: var(--neon-blue); margin-bottom: 10px; }
+        .ship-container {
+            width: 100%; height: 390px;
+            background: radial-gradient(circle at 50% 50%, #0a1128 0%, #02040a 100%);
+            border: 1px dashed rgba(0, 240, 255, 0.3); border-radius: 8px; position: relative;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden;
+        }
+        .ship-svg { width: 220px; height: 360px; filter: drop-shadow(0 0 12px rgba(0, 240, 255, 0.4)); }
+        .thruster-fire { animation: engine-burn 0.15s infinite alternate; }
+        @keyframes engine-burn { 0% { transform: scaleY(0.9); opacity: 0.85; } 100% { transform: scaleY(1.15); opacity: 1; } }
+
+        .ship-status-box {
+            width: 100%; margin-top: 10px; background: rgba(0,0,0,0.75); padding: 10px;
+            border-radius: 6px; border-left: 3px solid var(--neon-blue);
+        }
+        .health-bar-container { width: 100%; background: rgba(255, 255, 255, 0.1); height: 10px; border-radius: 5px; margin-top: 4px; overflow: hidden; }
+        .health-bar { height: 100%; width: 100%; background: var(--neon-green); transition: width 0.3s, background 0.3s; }
+
+        /* TERMINAL DE MANDOS */
+        .terminal-container {
+            background: var(--panel-bg); border-radius: 12px;
+            box-shadow: 0 0 35px rgba(0, 240, 255, 0.25); padding: 20px;
+            border: 1px solid var(--neon-blue); backdrop-filter: blur(10px);
+            display: flex; flex-direction: column; justify-content: space-between;
+        }
+        .header-bar { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--neon-blue); padding-bottom: 8px; margin-bottom: 12px; }
+        .timer-box { font-family: 'Orbitron'; font-size: 1.2rem; color: var(--neon-red); }
+        .progress-bar-container { width: 100%; background: rgba(255, 255, 255, 0.05); height: 8px; border-radius: 4px; margin-bottom: 15px; }
+        .progress-bar { height: 100%; width: 0%; background: var(--neon-green); transition: width 0.4s; }
+
+        .screen { display: none; text-align: center; }
+        .screen.active { display: block; }
+
+        .character-box {
+            display: flex; align-items: center; gap: 12px; background: rgba(0, 240, 255, 0.08);
+            border: 1px solid var(--neon-blue); border-radius: 8px; padding: 10px; margin-bottom: 12px; text-align: left;
+        }
+        .character-avatar { width: 55px; height: 55px; border-radius: 50%; border: 2px solid var(--neon-blue); background: rgba(0,0,0,0.5); flex-shrink: 0; overflow: hidden; }
+        .character-avatar svg { width: 100%; height: 100%; }
+        .character-dialogue { font-size: 0.9rem; line-height: 1.3; color: #f1f5f9; }
+        .character-name { font-family: 'Orbitron'; font-size: 0.75rem; color: var(--neon-yellow); margin-bottom: 2px; }
+
+        .lab-bench {
+            background: rgba(0, 0, 0, 0.7); border: 1px solid rgba(0, 240, 255, 0.3);
+            border-radius: 8px; padding: 15px; margin: 10px 0; min-height: 220px;
+            display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; overflow: hidden;
+        }
+
+        .interactive-options {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 10px; width: 100%; margin-top: 12px;
+        }
+
+        .btn-item {
+            background: rgba(0, 240, 255, 0.05); border: 1px solid var(--neon-blue);
+            color: white; padding: 10px 12px; border-radius: 6px; cursor: pointer;
+            font-size: 0.9rem; text-align: left; transition: all 0.2s;
+        }
+        .btn-item:hover { background: rgba(0, 240, 255, 0.25); transform: translateY(-2px); border-color: var(--neon-green); }
+
+        .btn-action {
+            background: var(--neon-green); color: black; font-family: 'Orbitron';
+            font-size: 1rem; font-weight: 700; padding: 10px 24px; border: none;
+            border-radius: 6px; cursor: pointer; margin-top: 10px; transition: all 0.2s;
+        }
+        .btn-action:hover { transform: scale(1.03); box-shadow: 0 0 15px var(--neon-green); }
+
+        .beaker {
+            width: 100px; height: 120px; border: 3px solid #cbd5e1; border-top: none;
+            border-radius: 0 0 12px 12px; position: relative; background: rgba(255,255,255,0.02);
+            overflow: hidden; display: flex; align-items: flex-end; justify-content: center;
+        }
+        .liquid { width: 100%; height: 50%; background: var(--neon-blue); transition: all 0.5s; display: flex; align-items: center; justify-content: center; font-weight: bold; color: black; font-size: 0.85rem; }
+        .floating-object { width: 28px; height: 28px; background: var(--neon-yellow); border-radius: 4px; position: absolute; transition: bottom 0.6s; border: 1px solid black; }
+
+        .feedback { font-weight: bold; min-height: 22px; margin-top: 8px; font-size: 0.95rem; }
+
+        /* MINIJUEGO 1: DISPERSIÓN DE CABLEADO MULTICOLOR */
+        .wire-scattered-container {
+            position: relative; width: 100%; height: 210px; border: 1px dashed rgba(0,240,255,0.3);
+            border-radius: 8px; background: rgba(0,0,0,0.4);
+        }
+        .wire-scattered-btn {
+            position: absolute; padding: 8px 12px; border-radius: 6px; border: 2px solid white;
+            cursor: pointer; font-weight: bold; color: black; font-size: 0.75rem; font-family: 'Orbitron';
+            box-shadow: 0 0 10px rgba(255,255,255,0.2); transition: transform 0.2s, opacity 0.2s;
+        }
+        .wire-scattered-btn:hover { transform: scale(1.08); }
+        .wire-scattered-btn.connected { opacity: 0.15; cursor: not-allowed; border-color: var(--neon-green); }
+
+        /* MINIJUEGO 2: RADAR */
+        .radar-box { width: 160px; height: 160px; border-radius: 50%; border: 3px solid var(--neon-blue); position: relative; display: flex; justify-content: center; align-items: center; box-shadow: 0 0 15px rgba(0,240,255,0.2); }
+        .radar-pointer { position: absolute; width: 50%; height: 3px; background: var(--neon-red); top: 50%; left: 50%; transform-origin: 0% 50%; }
+        .radar-target { position: absolute; width: 34px; height: 34px; border-radius: 50%; background: rgba(0, 255, 102, 0.4); border: 2px dashed var(--neon-green); top: 20px; right: 20px; animation: pulse-target 1s infinite alternate; }
+        @keyframes pulse-target { 0% { opacity: 0.4; transform: scale(0.9); } 100% { opacity: 1; transform: scale(1.1); } }
+
+        .hull-box { width: 280px; height: 160px; border: 2px solid #475569; background: #0f172a; position: relative; border-radius: 8px; overflow: hidden; }
+        .hull-hole { position: absolute; width: 22px; height: 22px; background: var(--neon-red); border-radius: 50%; cursor: pointer; box-shadow: 0 0 12px var(--neon-red); }
+
+        .simon-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 160px; }
+        .simon-btn { width: 70px; height: 70px; border-radius: 8px; opacity: 0.35; cursor: pointer; border: 1px solid rgba(255,255,255,0.3); }
+        .simon-btn.active { opacity: 1; box-shadow: 0 0 20px currentColor; transform: scale(1.05); }
+    </style>
+</head>
+<body>
+
+<!-- ESCENOGRAFÍA COMPLETA ESPACIAL -->
+<div class="stars-container" id="stars-host">
+    <div class="nebula-glow"></div>
+    
+    <!-- ESTRELLAS FUGACES -->
+    <div class="shooting-star" style="top:20%; right:-100px; animation-delay:0s;"></div>
+    <div class="shooting-star" style="top:55%; right:-100px; animation-delay:2.5s;"></div>
+    <div class="shooting-star" style="top:80%; right:-100px; animation-delay:4s;"></div>
+
+    <!-- PLANETAS -->
+    <div class="planet planet-earth"></div>
+    <div class="planet planet-mars"></div>
+    <div class="saturn-container"><div class="planet-saturn"></div><div class="saturn-ring"></div></div>
+    <div class="planet planet-neptune"></div>
+    <div class="planet planet-alien"></div>
+</div>
+
+<div class="main-layout">
+    <!-- PANEL DE LA NAVE -->
+    <div class="ship-panel">
+        <div class="ship-title">MONITOR DE FUSELAJE APOLO-X</div>
+        <div class="ship-container">
+            <svg class="ship-svg" viewBox="0 0 200 320">
+                <defs>
+                    <linearGradient id="metal-body" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stop-color="#1e293b"/><stop offset="50%" stop-color="#94a3b8"/><stop offset="100%" stop-color="#0f172a"/>
+                    </linearGradient>
+                    <linearGradient id="cockpit-glass" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#00f0ff"/><stop offset="100%" stop-color="#021526"/>
+                    </linearGradient>
+                    <linearGradient id="fire-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stop-color="#00f0ff"/><stop offset="40%" stop-color="#ff2a6d"/><stop offset="100%" stop-color="#ffcc00" stop-opacity="0"/>
+                    </linearGradient>
+                </defs>
+
+                <g class="thruster-fire">
+                    <polygon points="75,270 85,315 95,270" fill="url(#fire-grad)"/>
+                    <polygon points="105,270 115,315 125,270" fill="url(#fire-grad)"/>
+                </g>
+                <path d="M 100 80 L 20 230 L 55 250 L 75 230 Z" fill="#334155" stroke="#00f0ff" stroke-width="0.8"/>
+                <path d="M 100 80 L 180 230 L 145 250 L 125 230 Z" fill="#334155" stroke="#00f0ff" stroke-width="0.8"/>
+                <path d="M 100 20 L 128 90 L 132 230 L 120 265 L 80 265 L 68 230 L 72 90 Z" fill="url(#metal-body)" stroke="#475569" stroke-width="1.5"/>
+                <path d="M 100 45 Q 115 75 112 115 L 88 115 Q 85 75 100 45 Z" fill="url(#cockpit-glass)" stroke="#00f0ff" stroke-width="1.2"/>
+
+                <g id="svg-nodes">
+                    <circle id="svg-m1" cx="80" cy="130" r="3.5" fill="#ff2a6d"/>
+                    <circle id="svg-m2" cx="120" cy="130" r="3.5" fill="#ff2a6d"/>
+                    <circle id="svg-m3" cx="80" cy="150" r="3.5" fill="#ff2a6d"/>
+                    <circle id="svg-m4" cx="120" cy="150" r="3.5" fill="#ff2a6d"/>
+                    <circle id="svg-m5" cx="100" cy="140" r="5.5" fill="#ffcc00"/>
+                    <circle id="svg-m6" cx="80" cy="170" r="3.5" fill="#ff2a6d"/>
+                    <circle id="svg-m7" cx="120" cy="170" r="3.5" fill="#ff2a6d"/>
+                    <circle id="svg-m8" cx="80" cy="190" r="3.5" fill="#ff2a6d"/>
+                    <circle id="svg-m9" cx="120" cy="190" r="3.5" fill="#ff2a6d"/>
+                    <circle id="svg-m10" cx="100" cy="180" r="5.5" fill="#ffcc00"/>
+                    <circle id="svg-m11" cx="80" cy="210" r="3.5" fill="#ff2a6d"/>
+                    <circle id="svg-m12" cx="120" cy="210" r="3.5" fill="#ff2a6d"/>
+                    <circle id="svg-m13" cx="80" cy="230" r="3.5" fill="#ff2a6d"/>
+                    <circle id="svg-m14" cx="120" cy="230" r="3.5" fill="#ff2a6d"/>
+                    <circle id="svg-m15" cx="100" cy="220" r="5.5" fill="#ffcc00"/>
+                    <circle id="svg-m16" cx="85" cy="250" r="3.5" fill="#ff2a6d"/>
+                    <circle id="svg-m17" cx="115" cy="250" r="3.5" fill="#ff2a6d"/>
+                    <circle id="svg-m18" cx="95" cy="260" r="3.5" fill="#ff2a6d"/>
+                    <circle id="svg-m19" cx="105" cy="260" r="3.5" fill="#ff2a6d"/>
+                    <circle id="svg-m20" cx="100" cy="255" r="6.5" fill="#ffcc00"/>
+                </g>
+            </svg>
+        </div>
+
+        <div class="ship-status-box">
+            <div style="font-size: 0.75rem; color: #94a3b8; display:flex; justify-content:space-between;">
+                <span>SOPORTE VITAL:</span>
+                <span id="ship-health-val" style="color:var(--neon-green); font-weight:bold;">100%</span>
+            </div>
+            <div class="health-bar-container"><div id="ship-health-bar" class="health-bar"></div></div>
+            <div style="font-size: 0.75rem; color: #94a3b8; margin-top:8px;">REPARACIÓN GENERAL:</div>
+            <div id="ship-integrity" style="font-family: 'Orbitron'; font-size: 1.1rem; color: var(--neon-yellow);">0%</div>
+        </div>
+    </div>
+
+    <!-- TERMINAL INTERACTIVA -->
+    <div class="terminal-container">
+        <!-- INICIO -->
+        <div id="start-screen" class="screen active">
+            <h1 style="font-family: 'Orbitron'; color: var(--neon-red); font-size: 1.3rem; margin-top:0;">👨‍🚀 MISIÓN DE EMERGENCIA APOLO-X</h1>
+            <div class="character-box">
+                <div class="character-avatar">
+                    <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="#0284c7"/><circle cx="50" cy="38" r="18" fill="#e2e8f0"/><path d="M 30 75 Q 50 60 70 75 Z" fill="#e2e8f0"/><rect x="38" y="32" width="24" height="10" rx="3" fill="#0f172a"/></svg>
+                </div>
+                <div>
+                    <div class="character-name">COMANDANTE VALENTINA</div>
+                    <div class="character-dialogue">"¡Bienvenido piloto! Resuelve las pruebas de química y supera los minijuegos para poner la nave Apolo-X a salvo."</div>
+                </div>
+            </div>
+            <button class="btn-action" onclick="startMission()">INICIAR REPARACIÓN</button>
+        </div>
+
+        <!-- GAME SCREEN -->
+        <div id="game-screen" class="screen">
+            <div class="header-bar">
+                <div style="font-family: 'Orbitron'; font-size: 0.85rem; color: var(--neon-blue);" id="module-title">MÓDULO</div>
+                <div class="timer-box" id="timer">25:00</div>
+            </div>
+            <div class="progress-bar-container"><div id="progress-bar" class="progress-bar"></div></div>
+
+            <div class="character-box">
+                <div class="character-avatar" id="avatar-container"></div>
+                <div>
+                    <div class="character-name" id="character-name">SISTEMA A.I.</div>
+                    <div class="character-dialogue" id="character-dialogue">Cargando instrucciones...</div>
+                </div>
+            </div>
+
+            <div class="lab-bench" id="lab-bench"></div>
+            <div class="interactive-options" id="options-container"></div>
+            <div id="feedback" class="feedback"></div>
+        </div>
+
+        <!-- FINAL -->
+        <div id="end-screen" class="screen">
+            <h1 id="end-title" style="font-family: 'Orbitron'; font-size: 1.5rem;"></h1>
+            <div id="end-icon" style="font-size: 3.5rem; margin: 10px 0;"></div>
+            <p id="end-desc" style="font-size: 0.95rem; line-height: 1.5;"></p>
+            <button class="btn-action" onclick="location.reload()">REINTENTAR MISIÓN</button>
+        </div>
+    </div>
+</div>
+
+<script>
+(function generateUniverseDecorations() {
+    const host = document.getElementById('stars-host');
+    
+    // Generar 200 estrellas de fondo
+    for (let i = 0; i < 200; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        const size = Math.random() * 2.8 + 0.5;
+        star.style.width = `${size}px`; star.style.height = `${size}px`;
+        star.style.top = `${Math.random() * 100}%`; star.style.left = `${Math.random() * 100}%`;
+        star.style.setProperty('--duration', `${Math.random() * 4 + 1}s`);
+        host.appendChild(star);
+    }
+
+    // Generar cinturón de 12 asteroides
+    for (let i = 0; i < 12; i++) {
+        const ast = document.createElement('div');
+        ast.className = 'asteroid';
+        const size = Math.random() * 22 + 6;
+        ast.style.width = `${size}px`; ast.style.height = `${size}px`;
+        ast.style.top = `${Math.random() * 90}%`; ast.style.left = `${Math.random() * 90}%`;
+        ast.style.setProperty('--speed', `${Math.random() * 8 + 5}s`);
+        host.appendChild(ast);
+    }
+})();
+
+function shuffleArray(array) {
+    let arr = [...array];
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+}
+
+let currentStep = 0;
+let shipHealth = 100;
+let timeLeft = 1500;
+let timerInterval;
+
+// Variables de Minijuegos
+let wireStep = 0;
+let radarAngle = 0;
+let radarAnim = null;
+let holesFixed = 0;
+let simonSequence = [1, 4, 2, 3, 1, 3];
+let userSequence = [];
+let holeIntervals = [];
+
+const avatars = {
+    valentina: `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="#0284c7"/><circle cx="50" cy="38" r="18" fill="#e2e8f0"/><path d="M 30 75 Q 50 60 70 75 Z" fill="#e2e8f0"/><rect x="38" y="32" width="24" height="10" rx="3" fill="#0f172a"/></svg>`,
+    ai: `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="#b537f2"/><rect x="30" y="30" width="40" height="40" rx="8" fill="#0f172a" stroke="#00f0ff" stroke-width="2"/><circle cx="40" cy="45" r="4" fill="#00ff66"/><circle cx="60" cy="45" r="4" fill="#00ff66"/><path d="M 40 60 L 60 60" stroke="#00f0ff" stroke-width="2"/></svg>`
+};
+
+const levels = [
+    {
+        title: "MÓDULO 01: Sublimación de CO₂", speaker: "COMANDANTE VALENTINA", avatar: "valentina", isMinigame: false,
+        dialogue: "El CO₂ sólido bloquea los ductos. Usa el termostato para lograr la SUBLIMACIÓN directamente a gas.",
+        type: "slider", min: -100, max: 40, initial: -80, targetCheck: (val) => val >= -10 && val <= 30,
+        render: (val) => `<div style="font-size:1.8rem;">❄️ ➔ 💨</div><div>Temperatura: <b style="color:${val >= -10 ? 'var(--neon-red)' : 'var(--neon-blue)'}; font-size:1.2rem">${val} °C</b></div>`
+    },
+    {
+        title: "MÓDULO 02: Prueba de Densidad", speaker: "I.A. APOLO-X", avatar: "ai", isMinigame: false,
+        dialogue: "Elige el material con DENSIDAD INFERIOR a la del agua (1.0 g/cm³) para reparar la escotilla.",
+        type: "buttons", render: () => `<div class="beaker"><div class="floating-object" id="demo-object" style="bottom: 5px;"></div><div class="liquid">H₂O (1.0 g/cm³)</div></div>`,
+        options: [
+            { text: "Hierro Estructural (7.87 g/cm³)", density: 7.87, correct: false },
+            { text: "Polímero de Titanio (0.85 g/cm³)", density: 0.85, correct: true },
+            { text: "Cobre Puro (8.96 g/cm³)", density: 8.96, correct: false }
+        ],
+        onSelect: (opt) => { document.getElementById('demo-object').style.bottom = (opt.density < 1.0) ? "75px" : "5px"; }
+    },
+    {
+        title: "MÓDULO 03: Electrones de Valencia", speaker: "COMANDANTE VALENTINA", avatar: "valentina", isMinigame: false,
+        dialogue: "Identifica las partículas que orbitan en la capa externa del átomo para reequilibrar la carga.",
+        type: "buttons", render: () => `<div style="font-size:2rem;">⚛️ [ Átomo ]</div>`,
+        options: [
+            { text: "Protones (+)", correct: false },
+            { text: "Electrones de Valencia (-)", correct: true },
+            { text: "Neutrones (Sin carga)", correct: false }
+        ]
+    },
+    {
+        title: "MÓDULO 04: Gases Nobles", speaker: "I.A. APOLO-X", avatar: "ai", isMinigame: false,
+        dialogue: "Inyecta un gas inerte sin reactividad química (Grupo 18) para presurizar el tanque central.",
+        type: "buttons", render: () => `<div style="font-size:1.1rem; color:var(--neon-yellow)">[He] [Ne] [Ar] [Kr] [Xe]</div>`,
+        options: [
+            { text: "Metales Alcalinos", correct: false },
+            { text: "Gases Nobles", correct: true },
+            { text: "Halógenos", correct: false }
+        ]
+    },
+
+    // 5: MINIJUEGO CABLES MULTICOLOR
+    {
+        title: "🛠️ MINIJUEGO 1: Reconexión de Fibras Multicolor", speaker: "I.A. APOLO-X", avatar: "ai", isMinigame: true,
+        dialogue: "Conecta la serie completa de 8 cables en este orden cromático: **ROJO ➔ NARANJA ➔ AMARILLO ➔ VERDE ➔ CIAN ➔ AZUL ➔ PÚRPURA ➔ ROSA**.",
+        type: "minigame_wires"
+    },
+
+    {
+        title: "MÓDULO 06: Calibración de pH", speaker: "COMANDANTE VALENTINA", avatar: "valentina", isMinigame: false,
+        dialogue: "El refrigerante se acidificó. Ajusta el potenciómetro hasta obtener un pH NEUTRO de 7.",
+        type: "slider", min: 1, max: 14, initial: 3, targetCheck: (val) => val === 7,
+        render: (ph) => `<div class="beaker"><div class="liquid" style="background:${ph < 7 ? '#ff2a6d' : (ph > 7 ? '#00f0ff' : '#00ff66')}">pH: ${ph}</div></div>`
+    },
+    {
+        title: "MÓDULO 07: Destilación de Mezclas", speaker: "I.A. APOLO-X", avatar: "ai", isMinigame: false,
+        dialogue: "El agua contiene sal disuelta. Aplica el método correcto para vaporizarla y condensarla purificada.",
+        type: "buttons", render: () => `<div style="font-size:1rem; color:#a3e635">Solución Homogénea: H₂O + NaCl</div>`,
+        options: [
+            { text: "Filtración simple", correct: false },
+            { text: "Destilación Fraccionada", correct: true },
+            { text: "Decantación manual", correct: false }
+        ]
+    },
+    {
+        title: "MÓDULO 08: Reacciones Exotérmicas", speaker: "COMANDANTE VALENTINA", avatar: "valentina", isMinigame: false,
+        dialogue: "El motor liberó energía térmica. ¿Cómo se clasifica la reacción química que libera calor?",
+        type: "buttons", render: () => `<div style="color:var(--neon-yellow)">2 H₂ + O₂ ➔ 2 H₂O + Calor</div>`,
+        options: [
+            { text: "Reacción Endotérmica", correct: false },
+            { text: "Reacción Exotérmica", correct: true },
+            { text: "Síntesis Neutra", correct: false }
+        ]
+    },
+    {
+        title: "MÓDULO 09: Enlace Covalente", speaker: "I.A. APOLO-X", avatar: "ai", isMinigame: false,
+        dialogue: "¿Qué enlace se forma al COMPARTIR pares de electrones entre elementos no metálicos?",
+        type: "buttons", render: () => `<div style="font-size:1.5rem;">🤝 [e⁻ ⟷ e⁻]</div>`,
+        options: [
+            { text: "Enlace Iónico", correct: false },
+            { text: "Enlace Metálico", correct: false },
+            { text: "Enlace Covalente", correct: true }
+        ]
+    },
+
+    // 10: MINIJUEGO RADAR
+    {
+        title: "🛠️ MINIJUEGO 2: Alineación Rápida de Deflector", speaker: "COMANDANTE VALENTINA", avatar: "valentina", isMinigame: true,
+        dialogue: "Detén la aguja únicamente cuando esté **dentro del círculo verde** (cuadrante superior derecho) para pasar de nivel.",
+        type: "minigame_radar"
+    },
+
+    {
+        title: "MÓDULO 11: Protección de Corrosión", speaker: "COMANDANTE VALENTINA", avatar: "valentina", isMinigame: false,
+        dialogue: "El hierro está perdiendo electrones por oxidación. Activa la protección metálica adecuada.",
+        type: "buttons", render: () => `<div style="color:var(--neon-red)">Fe ➔ Fe³⁺ + 3e⁻ (Oxidación)</div>`,
+        options: [
+            { text: "Humedecer con agua pura", correct: false },
+            { text: "Galvanizado / Protección Catódica", correct: true },
+            { text: "Inyección de ácido carbónico", correct: false }
+        ]
+    },
+    {
+        title: "MÓDULO 12: Tensoactivos", speaker: "I.A. APOLO-X", avatar: "ai", isMinigame: false,
+        dialogue: "Hay grasa en las tuberías. Usa la sustancia anfipática adecuada para romper la tensión superficial.",
+        type: "buttons", render: () => `<div style="font-size:1.5rem;">🧼 💧 🛢️</div>`,
+        options: [
+            { text: "Detergentes Tensoactivos", correct: true },
+            { text: "Agua Desionizada pura", correct: false },
+            { text: "Queroseno Sintético", correct: false }
+        ]
+    },
+    {
+        title: "MÓDULO 13: Ley de Boyle", speaker: "COMANDANTE VALENTINA", avatar: "valentina", isMinigame: false,
+        dialogue: "Si mantenemos la temperatura constante y REDUCIMOS el volumen del tanque, ¿qué pasa con la presión?",
+        type: "buttons", render: () => `<div style="font-size:1.2rem; color:var(--neon-blue)">P₁ · V₁ = P₂ · V₂</div>`,
+        options: [
+            { text: "La presión disminuye", correct: false },
+            { text: "La presión AUMENTA proporcionalmente", correct: true },
+            { text: "La presión se mantiene igual", correct: false }
+        ]
+    },
+    {
+        title: "MÓDULO 14: Estequiometría", speaker: "I.A. APOLO-X", avatar: "ai", isMinigame: false,
+        dialogue: "Balancea la ecuación: CH₄ + 2 O₂ ➔ CO₂ + ? H₂O. ¿Cuántas moléculas de agua se producen?",
+        type: "buttons", render: () => `<div style="font-size:1.2rem; color:var(--neon-green)">CH₄ + 2 O₂ ➔ CO₂ + X H₂O</div>`,
+        options: [
+            { text: "1 Molécula de H₂O", correct: false },
+            { text: "2 Moléculas de H₂O", correct: true },
+            { text: "4 Moléculas de H₂O", correct: false }
+        ]
+    },
+
+    // 15: MINIJUEGO FUGAS MÓVILES
+    {
+        title: "🛠️ MINIJUEGO 3: Sellado de Fugas Dinámicas", speaker: "COMANDANTE VALENTINA", avatar: "valentina", isMinigame: true,
+        dialogue: "¡Las fugas rebotan por la escotilla! Toca y sella las 6 grietas en movimiento.",
+        type: "minigame_hull"
+    },
+
+    {
+        title: "MÓDULO 16: Catalizadores", speaker: "I.A. APOLO-X", avatar: "ai", isMinigame: false,
+        dialogue: "La reestructuración es lenta. Inyecta un agente que ACELERE la reacción sin consumirse.",
+        type: "buttons", render: () => `<div style="font-size:1.2rem; color:var(--neon-purple)">Energía de Activación ↓</div>`,
+        options: [
+            { text: "Inhibidor de velocidad", correct: false },
+            { text: "Catalizador Químico", correct: true },
+            { text: "Solución Amortiguadora", correct: false }
+        ]
+    },
+    {
+        title: "MÓDULO 17: Isótopos Radioactivos", speaker: "COMANDANTE VALENTINA", avatar: "valentina", isMinigame: false,
+        dialogue: "¿Qué diferencia a dos ISÓTOPOS del mismo elemento en el núcleo atómico?",
+        type: "buttons", render: () => `<div style="font-size:1.2rem;">¹²C  vs  ¹⁴C</div>`,
+        options: [
+            { text: "Diferente número de Protones", correct: false },
+            { text: "Diferente número de Neutrones", correct: true },
+            { text: "Diferente número de Electrones", correct: false }
+        ]
+    },
+    {
+        title: "MÓDULO 18: Electroquímica", speaker: "I.A. APOLO-X", avatar: "ai", isMinigame: false,
+        dialogue: "En una celda galvánica de reserva, ¿en qué electrodo ocurre la OXIDACIÓN?",
+        type: "buttons", render: () => `<div style="font-size:1.2rem; color:var(--neon-yellow)">[ Ánodo vs Cátodo ]</div>`,
+        options: [
+            { text: "En el Cátodo", correct: false },
+            { text: "En el ÁNODO", correct: true },
+            { text: "En el puente salino", correct: false }
+        ]
+    },
+    {
+        title: "MÓDULO 19: Soluciones Buffer", speaker: "COMANDANTE VALENTINA", avatar: "valentina", isMinigame: false,
+        dialogue: "Para evitar cambios drásticos de pH en las celdas térmicas, usa una solución...",
+        type: "buttons", render: () => `<div style="font-size:1.2rem; color:var(--neon-green)">Estabilización de pH</div>`,
+        options: [
+            { text: "Ácido Fuerte Concentrado", correct: false },
+            { text: "Buffer / Amortiguadora", correct: true },
+            { text: "Base Fuerte Pura", correct: false }
+        ]
+    },
+
+    // 20: MINIJUEGO SECUENCIA DE FUSIÓN
+    {
+        title: "🛠️ MINIJUEGO FINAL: Secuencia del Reactor", speaker: "I.A. APOLO-X", avatar: "ai", isMinigame: true,
+        dialogue: "Memoriza y repite la combinación de 6 pulso-reactores para iniciar el salto hiperespacial.",
+        type: "minigame_simon"
+    }
+];
+
+function startMission() {
+    document.getElementById('start-screen').classList.remove('active');
+    document.getElementById('game-screen').classList.add('active');
+    startTimer();
+    loadLevel();
+}
+
+function startTimer() {
+    timerInterval = setInterval(() => {
+        timeLeft--;
+        let min = Math.floor(timeLeft / 60);
+        let sec = timeLeft % 60;
+        document.getElementById('timer').innerText = `${min}:${sec < 10 ? '0' : ''}${sec}`;
+        if (timeLeft <= 0) {
+            endMission(false, "¡Se agotó el tiempo de soporte vital!");
+        }
+    }, 1000);
+}
+
+function clearMinigameIntervals() {
+    if (radarAnim !== null) {
+        cancelAnimationFrame(radarAnim);
+        radarAnim = null;
+    }
+    holeIntervals.forEach(clearInterval);
+    holeIntervals = [];
+}
+
+function loadLevel() {
+    clearMinigameIntervals();
+
+    if (currentStep >= levels.length) {
+        endMission(true, "¡Misión Cumplida! La nave Apolo-X está 100% operativa y ha entrado en hiperespacio.");
+        return;
+    }
+
+    const lvl = levels[currentStep];
+    document.getElementById('module-title').innerText = lvl.title;
+    document.getElementById('character-name').innerText = lvl.speaker;
+    document.getElementById('character-dialogue').innerHTML = lvl.dialogue;
+    document.getElementById('avatar-container').innerHTML = avatars[lvl.avatar];
+    document.getElementById('feedback').innerText = "";
+
+    const bench = document.getElementById('lab-bench');
+    const opts = document.getElementById('options-container');
+    bench.innerHTML = "";
+    opts.innerHTML = "";
+
+    let progressPct = (currentStep / levels.length) * 100;
+    document.getElementById('progress-bar').style.width = `${progressPct}%`;
+    document.getElementById('ship-integrity').innerText = `${Math.round(progressPct)}%`;
+
+    if (lvl.type === "slider") {
+        bench.innerHTML = `<div id="slider-render">${lvl.render(lvl.initial)}</div>`;
+        opts.innerHTML = `
+            <div style="width:90%; display:flex; flex-direction:column; align-items:center;">
+                <input type="range" min="${lvl.min}" max="${lvl.max}" value="${lvl.initial}" id="range-input" style="width:100%" oninput="updateSlider()">
+                <button class="btn-action" onclick="checkSlider()">AJUSTAR VALOR</button>
+            </div>
+        `;
+    } else if (lvl.type === "buttons") {
+        bench.innerHTML = lvl.render();
+        const randomizedOptions = shuffleArray(lvl.options);
+        randomizedOptions.forEach(opt => {
+            const btn = document.createElement('button');
+            btn.className = 'btn-item';
+            btn.innerText = opt.text;
+            btn.onclick = () => {
+                if (lvl.onSelect) lvl.onSelect(opt);
+                checkAnswer(opt.correct);
+            };
+            opts.appendChild(btn);
+        });
+    } else if (lvl.type === "minigame_wires") {
+        wireStep = 0;
+        const wireData = [
+            { id: 1, text: "FIBRA ROJA", bg: "var(--neon-red)", top: "10px", left: "10px" },
+            { id: 2, text: "FIBRA NARANJA", bg: "var(--neon-orange)", top: "10px", right: "10px" },
+            { id: 3, text: "FIBRA AMARILLA", bg: "var(--neon-yellow)", top: "60px", left: "110px" },
+            { id: 4, text: "FIBRA VERDE", bg: "var(--neon-green)", top: "110px", left: "10px" },
+            { id: 5, text: "FIBRA CIAN", bg: "var(--neon-cyan)", top: "110px", right: "10px" },
+            { id: 6, text: "FIBRA AZUL", bg: "var(--neon-blue)", top: "160px", left: "10px" },
+            { id: 7, text: "FIBRA PÚRPURA", bg: "var(--neon-purple)", top: "160px", right: "10px", color: "white" },
+            { id: 8, text: "FIBRA ROSA", bg: "var(--neon-pink)", top: "160px", left: "110px", color: "white" }
+        ];
+
+        let html = `<div class="wire-scattered-container">`;
+        wireData.forEach(w => {
+            let posStyles = `top:${w.top}; ${w.left ? `left:${w.left};` : ''} ${w.right ? `right:${w.right};` : ''}`;
+            html += `<div class="wire-scattered-btn" style="background:${w.bg}; ${posStyles} ${w.color ? `color:${w.color};`:''}" id="wire-${w.id}" onclick="pressWire(${w.id})">${w.text}</div>`;
+        });
+        html += `</div>`;
+        bench.innerHTML = html;
+    } else if (lvl.type === "minigame_radar") {
+        radarAngle = 0;
+        bench.innerHTML = `
+            <div class="radar-box">
+                <div class="radar-target"></div>
+                <div class="radar-pointer" id="radar-pointer"></div>
+            </div>
+        `;
+        opts.innerHTML = `<button class="btn-action" onclick="stopRadar()">BLOQUEAR DEFLECTOR</button>`;
+        animateRadar();
+    } else if (lvl.type === "minigame_hull") {
+        holesFixed = 0;
+        bench.innerHTML = `
+            <div class="hull-box" id="hull-box">
+                <div style="font-size:0.7rem; color:var(--neon-blue); position:absolute; top:4px; left:8px;">GRIETAS RESTANTES: <span id="hole-count">6</span></div>
+            </div>
+        `;
+        setupMovingHoles();
+    } else if (lvl.type === "minigame_simon") {
+        userSequence = [];
+        bench.innerHTML = `
+            <div class="simon-grid">
+                <div class="simon-btn" id="s-1" style="background:var(--neon-red)" onclick="pressSimon(1)"></div>
+                <div class="simon-btn" id="s-2" style="background:var(--neon-blue)" onclick="pressSimon(2)"></div>
+                <div class="simon-btn" id="s-3" style="background:var(--neon-green)" onclick="pressSimon(3)"></div>
+                <div class="simon-btn" id="s-4" style="background:var(--neon-yellow)" onclick="pressSimon(4)"></div>
+            </div>
+        `;
+        opts.innerHTML = `<button class="btn-action" onclick="playSimon()">REPRODUCIR SECUENCIA</button>`;
+    }
+}
+
+/* MINIJUEGO 1: CABLES MULTICOLOR */
+function pressWire(id) {
+    if (id === wireStep + 1) {
+        wireStep++;
+        document.getElementById(`wire-${id}`).classList.add('connected');
+        if (wireStep === 8) checkAnswer(true);
+    } else {
+        resetMinigame("⚡ ¡Cables cruzados! Secuencia incorrecta, reintentando...");
+    }
+}
+
+/* MINIJUEGO 2: RADAR */
+function animateRadar() {
+    radarAngle = (radarAngle + 4) % 360;
+    const ptr = document.getElementById('radar-pointer');
+    if (ptr) {
+        ptr.style.transform = `rotate(${radarAngle}deg)`;
+        radarAnim = requestAnimationFrame(animateRadar);
+    }
+}
+
+function stopRadar() {
+    if (radarAnim !== null) {
+        cancelAnimationFrame(radarAnim);
+        radarAnim = null;
+    }
+    let currentDeg = radarAngle % 360;
+    if (currentDeg >= 290 && currentDeg <= 340) {
+        checkAnswer(true);
+    } else {
+        resetMinigame("🎯 ¡Alineación fallida! Tienes que frenar la aguja sobre el círculo verde.");
+    }
+}
+
+/* MINIJUEGO 3: FUGAS */
+function setupMovingHoles() {
+    const container = document.getElementById('hull-box');
+    for(let i = 0; i < 6; i++) {
+        let hole = document.createElement('div');
+        hole.className = 'hull-hole';
+        let posX = Math.random() * 230 + 10;
+        let posY = Math.random() * 100 + 25;
+        let dx = (Math.random() - 0.5) * 3;
+        let dy = (Math.random() - 0.5) * 3;
+        
+        hole.style.left = `${posX}px`;
+        hole.style.top = `${posY}px`;
+
+        hole.onclick = () => {
+            hole.style.display = 'none';
+            holesFixed++;
+            document.getElementById('hole-count').innerText = 6 - holesFixed;
+            if (holesFixed === 6) checkAnswer(true);
+        };
+
+        container.appendChild(hole);
+
+        let moveInt = setInterval(() => {
+            posX += dx; posY += dy;
+            if(posX <= 5 || posX >= 250) dx *= -1;
+            if(posY <= 20 || posY >= 130) dy *= -1;
+            hole.style.left = `${posX}px`;
+            hole.style.top = `${posY}px`;
+        }, 30);
+
+        holeIntervals.push(moveInt);
+    }
+}
+
+/* MINIJUEGO 4: REACTOR */
+function playSimon() {
+    userSequence = [];
+    let i = 0;
+    let timer = setInterval(() => {
+        let btnId = simonSequence[i];
+        let btn = document.getElementById(`s-${btnId}`);
+        if(btn) btn.classList.add('active');
+        setTimeout(() => { if(btn) btn.classList.remove('active'); }, 300);
+        i++;
+        if (i >= simonSequence.length) clearInterval(timer);
+    }, 500);
+}
+
+function pressSimon(id) {
+    userSequence.push(id);
+    let btn = document.getElementById(`s-${id}`);
+    btn.classList.add('active');
+    setTimeout(() => btn.classList.remove('active'), 150);
+
+    let idx = userSequence.length - 1;
+    if (userSequence[idx] !== simonSequence[idx]) {
+        resetMinigame("🔴 Secuencia del reactor incorrecta. Reintentando...");
+    } else if (userSequence.length === simonSequence.length) {
+        checkAnswer(true);
+    }
+}
+
+/* REINICIO DE MINIJUEGOS */
+function resetMinigame(msg) {
+    clearMinigameIntervals();
+    const fb = document.getElementById('feedback');
+    fb.style.color = "var(--neon-yellow)";
+    fb.innerText = msg;
+    setTimeout(() => {
+        loadLevel();
+    }, 1200);
+}
+
+/* SLIDER Y RESPUESTAS */
+function updateSlider() {
+    const val = parseInt(document.getElementById('range-input').value);
+    const lvl = levels[currentStep];
+    document.getElementById('slider-render').innerHTML = lvl.render(val);
+}
+function checkSlider() {
+    const val = parseInt(document.getElementById('range-input').value);
+    const lvl = levels[currentStep];
+    checkAnswer(lvl.targetCheck(val));
+}
+
+function checkAnswer(isCorrect, customMsg) {
+    clearMinigameIntervals();
+    const fb = document.getElementById('feedback');
+
+    if (isCorrect) {
+        fb.style.color = "var(--neon-green)";
+        fb.innerText = "¡SISTEMA REPARADO EXITOSAMENTE!";
+        
+        let node = document.getElementById(`svg-m${currentStep + 1}`);
+        if (node) node.setAttribute("fill", "var(--neon-green)");
+
+        currentStep++;
+        setTimeout(loadLevel, 1200);
+    } else {
+        fb.style.color = "var(--neon-red)";
+        fb.innerText = customMsg || "¡RESPUESTA INCORRECTA!";
+        
+        document.body.classList.add('damage-flash');
+        setTimeout(() => document.body.classList.remove('damage-flash'), 400);
+
+        shipHealth -= 15;
+        if (shipHealth < 0) shipHealth = 0;
+        
+        const healthBar = document.getElementById('ship-health-bar');
+        healthBar.style.width = `${shipHealth}%`;
+        document.getElementById('ship-health-val').innerText = `${shipHealth}%`;
+
+        if (shipHealth <= 30) healthBar.style.background = "var(--neon-red)";
+        else if (shipHealth <= 60) healthBar.style.background = "var(--neon-yellow)";
+
+        if (shipHealth <= 0) {
+            endMission(false, "Soporte vital colapsado por fallos químicos.");
+        }
+    }
+}
+
+function endMission(success, message) {
+    clearInterval(timerInterval);
+    clearMinigameIntervals();
+    document.getElementById('game-screen').classList.remove('active');
+    const endScreen = document.getElementById('end-screen');
+    endScreen.classList.add('active');
+
+    if (success) {
+        document.getElementById('end-title').style.color = "var(--neon-green)";
+        document.getElementById('end-title').innerText = "¡MISIÓN EXITOSA!";
+        document.getElementById('end-icon').innerText = "🚀✨";
+    } else {
+        document.getElementById('end-title').style.color = "var(--neon-red)";
+        document.getElementById('end-title').innerText = "MISIÓN FALLIDA";
+        document.getElementById('end-icon').innerText = "💥";
+    }
+    document.getElementById('end-desc').innerText = message;
+}
+</script>
+</body>
+</html>
